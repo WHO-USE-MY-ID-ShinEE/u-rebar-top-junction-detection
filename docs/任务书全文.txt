@@ -1,0 +1,292 @@
+[P1|Normal] 智能系统工程训练任务书
+[P2|Heading 2] 一、目的和要求
+[P3|Normal] 智能工程训练是智能科学与技术专业学生在修完《人工智能》《智能控制》《模式识别》等专业课程后所进行的关键实践环节。本训练旨在引导学生掌握智能技术在实际工程中的通用应用方法，运用所学专业知识完成一项智能系统的综合性设计。具体要求如下：
+[P4|Normal] (1) 在系统设计过程中，主动学习工程伦理，熟悉智能系统工程项目的设计流程、行业规范与技术标准；能够依据给定的技术指标或经济指标，科学地进行设备选型、数据处理与实验验证，培养严谨求实的工程素养。
+[P5|Normal] (2) 课题模拟实际工程项目，要求学生直面真实问题，通过收集资料（含网络检索）、自主学习新知识，综合运用所学知识与实验条件制定解决方案。借助方案论证、计算机仿真或模拟实验等手段，有效攻克项目涉及的关键技术及非技术性难题，并在设计中充分体现创新意识。
+[P6|Normal] 通过全流程的工程实践，将理论知识转化为解决实际问题的能力，最终完成全部设计任务，培养并提升解决复杂工程问题的综合素养。
+[P7|Heading 2] 二、课程要求
+[P8|Normal] 本课程训练要求学生严格遵循任务书规定，在任课教师的指导下，发扬“钟掘精神”——以专注严谨的态度对待每一个技术细节，以奋发崛起的斗志攻克每一个工程难关。学生须独立完成所选（或所分配）项目的全部设计任务。训练结束时，每人须按规范提交课程报告材料1份（详见报告要求栏），并参加汇报检查，以扎实的成果展现智能学子的专业风采与精神风貌。
+[P9|Heading 2] 三、课题任务
+[P10|Heading 2] 课题一 基于二维栅格地图的机器人自主导航技术
+[P11|List Paragraph] 设计内容
+[P12|Normal] 二维栅格地图作为一种简洁有效的环境表示方法，广泛应用于移动机器人的路径规划与导航中。现有的移动机器人或无人驾驶汽车均是基于已有地图进行导航，能在已有的地图情况下正确对环境中的移动机器人进行精准定位、实时完成全局路径规划及局部轨迹规划尤为重要。本任务旨在通过TurtleBot3移动机器人平台，研究并实现基于二维栅格地图的自主导航算法，使机器人能够在已知环境地图中自主规划路径、避开障碍物并准确到达目的地。
+[P13|List Paragraph] 材料准备
+[P14|List Paragraph] 语言C++
+[P15|List Paragraph] Ubuntu 18.04 + ROS Melodic
+[P16|List Paragraph] ROS navigation工具包
+[P17|List Paragraph] Gazebo动态模拟器、Rviz三维可视化平台
+[P18|List Paragraph] https://github.com/ROBOTIS-GIT/turtlebot3.git
+[P19|List Paragraph] Turtlebot3移动机器人
+[P20|List Paragraph] 设计要求
+[P21|List Paragraph] 熟悉TurtleBot3移动机器人的硬件组成、软件架构及基本操作；
+[P22|List Paragraph] 输入输出描述：输入为ROS地图文件格式.pgm及其参数文件.yaml和目标点位置，输出为机器人的速度、角速度；
+[P23|List Paragraph] 显示功能：Rviz中添加相应消息进行显示，要求能在Rviz界面显示加载原始地图、全局代价地图（global costmap）、局部代价地图（local costmap）、机器人全局规划路径（gloabal path）、机器人局部路径（local path）、机器人模型，且与Turtlebot3机器人实时规划结果同步显示；
+[P24|List Paragraph] 仿真环境配置：启动gazebo动态模拟器，正确读取仿真环境发送信息；
+[P25|List Paragraph] Turtlebot3机器人配置：连接导航所需传感器，如激光雷达，以及控制器；
+[P26|List Paragraph] 键盘控制功能：编写键盘控制节点、实现键盘控制机器人运动功能，验证定位功能的准确性；
+[P27|List Paragraph] 点到点导航功能：配置ROS navigation工具包，利用Rviz 2D Nav Goal 插件设置目标位姿，实现机器人全局路径规划、局部路径规划，完成点到点的自主导航。
+[P28|List Paragraph] 数据格式建议
+[P29|Normal] 键盘控制节点发送数据格式如下：
+[P30|Normal] //ROS标准数据类型 正确配置头文件即可
+[P31|Normal] geometry_msgs/Twist :
+[P32|Normal] {
+[P33|Normal] geometry_msgs/Vector3 linear:
+[P34|Normal] {
+[P35|Normal] float64 x
+[P36|Normal] float64 y
+[P37|Normal] float64 z
+[P38|Normal] }
+[P39|Normal] geometry_msgs/Vector3 angular:
+[P40|Normal] {
+[P41|Normal] float64 x
+[P42|Normal] float64 y
+[P43|Normal] float64 z
+[P44|Normal] }
+[P45|Normal] }
+[P46|List Paragraph] 报告要求
+[P47|Normal] 提交纸质版课程报告一份，包括内容有：方案论述，框架设计，程序设计，测试方案与测试结果等。
+[P48|Normal] 电子版材料：录制演示视频，在汇报中展示。
+[P49|Normal] 上交材料：(1)课程设计报告；(2)系统程序；(3)自己认为必要的辅助材料。
+[P51|Heading 2] 课题二  面向水田复杂地形风险的全覆盖路径规划算法
+[P52|List Paragraph] 设计内容
+[P53|Normal] 随着智能农机和农业机器人技术的发展，水稻田自主作业对全覆盖路径规划的安全性与适应性提出了更高要求。水稻田存在边界不规则、泥脚深度空间差异显著、局部易陷及滑移风险高等特点，传统仅考虑覆盖率和路径长度的规划方法难以满足复杂水田环境下的安全作业需求。本任务旨在研究面向水稻田地形风险感知的全覆盖路径规划算法，将环境风险信息引入覆盖方向与路径代价模型，在保证作业区域完整覆盖的前提下，降低高风险区域的累计路径暴露，同时兼顾路径长度、转弯次数及重复覆盖率等指标，实现安全、高效的水稻田全覆盖作业规划。本任务旨在基于TurtleBot3移动机器人平台，深入研究机器人全覆盖路径规划算法，特别是探索并实践一种适用于不同环境的规划策略。
+[P54|List Paragraph] 材料准备
+[P55|List Paragraph] 语言C++
+[P56|List Paragraph] Ubuntu 18.04 + ROS Melodic
+[P57|List Paragraph] ROS coverage_Planning功能包
+[P58|List Paragraph] Rviz三维可视化平台
+[P59|List Paragraph] https://github.com/li-haojia/Clean-robot-turtlebot3.git
+[P60|List Paragraph] Turtlebot3移动机器人
+[P61|List Paragraph] 设计要求
+[P62|Normal] 1)	仔细阅读、体会、理解任务书，明确设计任务和目标，培养独立查阅文献资料、设计/开发解决方案、团队合作、沟通、终身学习的能力。查阅相关教材、论文和文献资料，了调研机器人在水田中的全局覆盖路径规划方法的研究现状，以及与本设计任务有关的国内外发展状况；
+[P63|Normal] 2)	深入了解常用的覆盖路径规划算法及其变种；了解和熟悉引入风险地图的覆盖路径规划方法；学习并能够熟练使用Ubuntu 18.04系统、ROS Melodic及Rviz进行仿真；
+[P64|Normal] 3） 熟悉TurtleBot3移动机器人的硬件组成、软件架构及基本操作；
+[P65|Normal] 4)	根据TurtleBot3平台的特点和实验需求，编写覆盖路径规划算法，用Rviz进行仿真，对比不同规划地图下加入风险数据的实验结果，并给出对比路径和数据；
+[P66|Normal] 5)	输入输出描述：要求编写的程序能够根据给定输入输出类型、给定地图，使Turtlebot3机器人尽可能覆盖整个地图，同时在Rviz界面可视化路径，并使累计风险最小；
+[P67|List Paragraph] 输入为给定起点和终点，起点消息类型为geometry_msgs/PoseWithConvarianceStamped，终点消息类型为geometry_msgs/PoseStamped；
+[P68|List Paragraph] 输出为规划路径及其路径节点、车辆模型可视化，规划路径消息类型为nav_msgs/Path，路径节点和车辆模型消息类型均为visualization_msgs/MarkerArray；
+[P69|List Paragraph] 栅格地图消息类型为nav_msgs/OccupancyGrid。
+[P70|List Paragraph] 数据建议格式
+[P71|Normal] 1）起点消息类型数据格式如下：
+[P72|Normal] //ROS标准数据类型 正确配置头文件即可
+[P73|Normal] geometry_msgs/PoseWithConvarianceStamped
+[P74|Normal] std_msgs/Header header
+[P75|Normal] uint32 seq
+[P76|Normal] time stamp
+[P77|Normal] string frame_id
+[P78|Normal] geometry_msgs/PoseWithConvariance pose
+[P79|Normal] geometry_msgs/Pose pose
+[P80|Normal] geometry_msgs/Point position
+[P81|Normal] float64 x
+[P82|Normal] float64 y
+[P83|Normal] float64 y
+[P84|Normal] geometry_msgs/Quaternion orientation
+[P85|Normal] float64 x
+[P86|Normal] float64 y
+[P87|Normal] float64 z
+[P88|Normal] float64 w
+[P89|Normal] float64[36] convariance
+[P90|Normal] 2）终点消息类型数据格式如下：
+[P91|Normal] //ROS标准数据类型 正确配置头文件即可
+[P92|Normal] geometry_msgs/PoseStamped
+[P93|Normal] std_msgs/Header header
+[P94|Normal] uint32 seq
+[P95|Normal] time stamp
+[P96|Normal] string frame_id
+[P97|Normal] geometry_msgs/Pose pose
+[P98|Normal] geometry_msgs/Point position
+[P99|Normal] float64 x
+[P100|Normal] float64 y
+[P101|Normal] float64 y
+[P102|Normal] geometry_msgs/Quaternion orientation
+[P103|Normal] float64 x
+[P104|Normal] float64 y
+[P105|Normal] float64 z
+[P106|Normal] float64 w
+[P107|Normal] 3）规划路径消息类型数据格式如下：
+[P108|Normal] //ROS标准数据类型 正确配置头文件即可
+[P109|Normal] nav_msgs/Path
+[P110|Normal] std_msgs/Header header
+[P111|Normal] uint32 seq
+[P112|Normal] time stamp
+[P113|Normal] string frame_id
+[P114|Normal] geometry_msgs/PoseStamped[] poses
+[P115|Normal] std_msgs/Header header
+[P116|Normal] uint32 seq
+[P117|Normal] time stamp
+[P118|Normal] string frame_id
+[P119|Normal] geometry_msgs/Pose pose
+[P120|Normal] geometry_msgs/Point position
+[P121|Normal] float64 x
+[P122|Normal] float64 y
+[P123|Normal] float64 y
+[P124|Normal] geometry_msgs/Quaternion orientation
+[P125|Normal] float64 x
+[P126|Normal] float64 y
+[P127|Normal] float64 z
+[P128|Normal] float64 w
+[P129|List Paragraph] 报告要求
+[P130|Normal] 提交纸质版课程报告一份，包括内容有：方案论述，框架设计，程序设计，测试方案与测试结果等。
+[P131|Normal] 电子版材料：录制演示视频，在汇报中展示。
+[P132|Normal] 上交材料：(1)课程设计报告；(2)系统程序；(3)自己认为必要的辅助材料。
+[P133|Normal] 课题三  基于YOLOv8的远景行人检测
+[P134|Normal] 项目内容总体简介：
+[P135|Normal] 行人检测（Pedestrian detection）作为计算机视觉领域的一个关键研究课题，在辅助驾驶、智能交通系统等多个应用场景中已经取得了显著的进展。YOLOv8凭借其卓越的性能、高度的灵活行和扩展性在目标检测领域具有显著的地位。然而针对小目标检测，YOLOv8在部分场景下的检测性能不佳，会存在误检和漏检的情况，导致准确率下降。通过对原有的基本网络结构添加注意力机制，使得网络可以更精确地提取特征，从而提升网络的检测能力
+[P136|Normal] 具体设计任务如下：
+[P137|Normal] 远景行人为目标检测对象，设计基于YOLOv8的算法框架实现快速、有效的检测。
+[P138|Normal] 构建YOLOv8的基本网络框架，对YOLOv8的框架算法进行理解，对YOLOv8的框架进行修改实现更高精度、高效的检测。
+[P139|Normal] 由于检测目标随着视角的远景，目标的尺度也会随之改变，大部分检测目标的尺度较小，提供的有用信息较少，因此需要设计合适的特征提取网络，保证丰富的浅层信息的同时保证深层的语义信息。
+[P140|Normal] 课题四： U 型截面多层钢筋架的捆扎交叉点深度视觉检测
+[P141|List Paragraph] 设计内容
+[P142|Normal] 在预制构件工厂生产过程中，U 型截面多层钢筋笼需要对钢筋骨架交叉位置完成捆扎作业。目前钢筋笼捆扎作业大多依靠人工完成，工人长时间重复性作业，工作效率低下，人力成本居高不下；钢筋作业环境粉尘大、劳动强度高，长期作业会对工人身体造成损伤，亟需自动化捆扎设备替代人工作业。自动化捆扎设备的前提是精准识别钢筋笼顶层骨架全部钢筋交叉点，避开下层钢筋交叉点以及现场杂物带来的干扰。
+[P143|Normal] 本课题针对 U 型截面多层钢筋笼，基于深度图像与灰度图像融合的视觉检测方案，完成钢筋笼顶层骨架钢筋交叉点检测。利用灰度图像提取钢筋纹理、边缘特征，利用深度图像提供空间深度信息区分钢筋层位，过滤下层钢筋交叉点以及现场非钢筋物体产生的虚假交叉特征，准确输出顶层全部钢筋交叉点坐标，为后续机器人自动捆扎提供位置数据。
+[P144|Normal] <IMAGE>
+[P145|List Paragraph] 材料准备
+[P146|Normal] 1）开发语言：C++ / Python；
+[P147|Normal] 2）操作系统：Ubuntu20.04 或 Ubuntu22.04；
+[P148|Normal] 3）核心开源库：OpenCV，可搭配 numpy、PCL 深度图像处理库；
+[P149|Normal] 4）数据集：U 型截面多层钢筋笼采集灰度图像、对应深度图像样本（包含不同光照、	杂物干扰、多层钢筋堆叠场景样本）；
+[P150|List Paragraph] 仿真工具：图像可视化调试工具；
+[P151|Normal] 6）硬件参考：工业灰度相机、深度相机（用于采集灰度图、深度图）。
+[P154|Normal] 3、设计要求
+[P155|Normal] 1）调研预制构件钢筋笼自动化加工、工业视觉钢筋检测相关文献资料，了解国内外	钢筋视觉检测技术发展现状；掌握边缘检测、特征点检测、图像分割、深度阈值过滤	等图像处理算法原理，熟练使用 Ubuntu 系统、OpenCV 库完成图像读取、预处理、	特征提取、结果可视化。
+[P156|Normal] 2）熟悉 U 型截面多层钢筋笼结构特点：存在多层钢筋堆叠，顶层为待捆扎目标层，	下层钢筋在灰度图像中会显现轮廓，容易造成误检；现场图像存在水泥碎屑、金属杂	物、光照不均、反光等干扰。
+[P157|Normal] 3）系统输入输出定义：
+[P158|Normal] 输入：同一场景配对的灰度图像、深度图像；
+[P159|Normal] 输出：钢筋笼顶层骨架钢筋全部交叉点二维像素坐标（可扩展输出相机坐标系三维坐标）；
+[P160|Normal] 完成标准：输出顶层钢筋的全部交叉点，做到无漏检、无误检；使用图像增强方法，确保输出图像能清晰看到钢筋骨架和交叉点位置；不能检出下层钢筋交叉点，不能检出非钢筋材质物体产生的虚假交叉点。
+[P161|Normal] 4）算法流程设计：完成图像读取、图像预处理（滤波降噪、光照校正）、钢筋区域分	割、灰度图像钢筋边缘提取、交叉点初步提取；利用深度图像深度阈值筛选，依据深	度信息区分钢筋层位，滤除下层钢筋交叉点以及非钢筋物体的虚假交叉点；输出最终顶层交叉点集合。
+[P162|Normal] 5）可视化功能：在可视化窗口中加载原始灰度图、深度图，将检测得到的顶层钢筋交叉点使用标记绘制在图像上，直观展示检测结果；能够区分显示被过滤掉的下层交叉点、虚假干扰点，便于算法调试与效果分析。
+[P163|Normal] 6）测试验证：使用多组不同工况样本数据集开展测试，统计漏检数量、误检数量，计算检测准确率，分析光照、杂物、钢筋堆叠对检测结果的影响，调优算法参数，优化检测效果。
+[P164|Normal] 数据格式建议
+[P165|Normal] 1）输入：灰度图像（png/jpg）、对应深度图像（tif，深度值保存像素或者 16 位深度	图）；
+[P166|Normal] 2）输出：交叉点坐标可输出 json格式存储，每一行存储一个交叉点[x像素，y像素]；	也可输出 csv 格式保存点位集合；
+[P167|Normal] 3）可视化输出：在原灰度图上标记交叉点的结果。输出图像应清晰美观，能直观看	到钢筋骨架和交叉点位置，图片 png/jpg 格式。
+[P168|Normal] 报告要求
+[P169|Normal] 提交纸质版课程报告一份，报告包含：方案论述、系统框架设计、算法与程序设计、	测试方案、测试结果分析等内容。
+[P170|Normal] 电子版材料：录制算法运行演示视频，汇报时展示。
+[P171|Normal] 上交材料清单：
+[P172|Normal] (1) 课程设计报告；
+[P173|Normal] (2) 系统源代码（附带详细注释、运行说明文档）；
+[P174|Normal] (3) 数据集样本、测试输出结果、辅助材料。
+[P175|Normal] 课题五   语音情感识别方法与设计
+[P176|List Paragraph] 设计内容
+[P177|List Paragraph] 近年来，随着信息技术的飞速发展，智能设备正在逐渐地融入到人们的日常生活当中，语音作为人机交互的最为便捷的方式之一，得到了广泛的应用。让机器听懂人类语言的同时 ，如何实现与人类有感情的自然交流 ，是无数科研工作者的目标。
+[P178|List Paragraph] 目前对于情感的描述主要有两种方法。第一种是基于离散的情感划分，将人类日常生活中广泛使用的基本情感分为愤怒、开心、兴奋、悲伤、厌恶等；另一种是基于连续维度情感划分，主要通过不同的效价度和激活程度来对不同情感进行区分的。
+[P179|List Paragraph] 语音情感识别是指通过计算机处理，以帧为单位对情感信号进行特征提取，模拟人类感知并理解人类的情感，进而推断出语音情感类型的一种技术。其任务是从说话人的语音中提取出与情感有关的相关特征，并找出这些特征与人类情感的映射关系，最终对情感进行分类。
+[P180|List Paragraph] 语音情感识别的应用范围广泛，如可以结合驾驶员的语音、表情等信息检测其精神状态，提醒驾驶员控制情绪、安全驾驶；依据可穿戴设备采集病人的语音信号实时检测其异常情感状态，提高治疗效率；结合语音情感信息和自动翻译结果来帮助各方发言者顺畅交流等。
+[P181|List Paragraph] 经典的语音情感识别模型包含两步:首先手动提取声学特征;然后将这些特征输入到分类模型中完成情感识别。声学特征主要包括了基频(F0)、能量(Energy)、梅尔频率倒谱系数(MFCC)等。这类特征的设计受到了人类感性知识的启发，可以统称为启发式特征。早期的语音情感识别研究都是基于启发式特征展开,其中传统的识别算法包括隐马尔可夫模型(Hidden Markov Model,HMM)、高斯混合模型(Gaussian Mixture Model,GMM)、支持向量机(Support Vector Machine,SVM)等。此外,还有一些基于决策树(Decision Trees,DT),K近邻(K-Nearest Neighbor,K-NN),K均值(K-means),朴素贝叶斯(Naive Bayes)的方法。近年来,随着深度学习的发展与进步,提出了一些基于深度学习的模型,如深度神经网络(Deep Neural Network,DNN) 、 循 环 神 经 网 络 (Recurrent Neural Network,RNN) 、 长 短 时 记 忆 网 络 (Long-Short Time Memory,LSTM)等。由于人对语音情感识别的认知毕竟是有局限性的,单纯利用人类的知识很难提取到丰富全面的特征,近几年基于振幅时频特征的语音情感识别研究发展迅速,并提出了一些经典模型。例如凭借局部连接和权值共享的优势,卷积神经网络(Convolutional Neural Network,CNN)在语音和图像领域得到广泛应用。目前, 利用 CNN 从振幅时频特征中提取深度声学特征也成为了语音情感识别领域最常用的方法之一。
+[P182|List Paragraph] 2. 材料准备
+[P183|Normal] 1）语言python
+[P184|Normal] 2）任意一款python编辑器如pycharm
+[P185|Normal] 3）pytorch框架或tensorflow框架，librosa库
+[P186|Normal] 4）CASIA情感语音数据集（下载地址：https://aistudio.baidu.com/datasetdetail/209512）
+[P187|Normal] 3. 设计要求
+[P188|List Paragraph] 1）查阅语音情感识别相关的资料文献，了解语音情感识别系统设计的基本要求，了解语音情感识别系统的组成部分及各部分的作用。
+[P189|List Paragraph] 2）收集一种或多种常见的语音情感识别的数据集，如CASIA语音情感数据集、柏林语音情感数据集等。选择一种数据集，按一定比例将其划分为训练数据与测试数据，用于语音情感识别网络的训练及测试。
+[P190|List Paragraph] 3）了解常见的几种用于语音情感识别的声学特征，如美尔倒谱频率（MFCC）、短时能量谱等，掌握其中一种特征提取的原理及方法，提取语音特征，用于语音情感识别网络的训练。
+[P191|List Paragraph] 4）了解卷积神经网络的基本原理，学习pytorch框架的使用方法，搭建基于卷积神经网络的深度学习模型，利用语音数据集对模型进行训练。
+[P192|List Paragraph] 5）利用训练完成的网络模型进行语音情感识别测试，计算网络的识别准确率，绘制识别准确率曲线与loss下降曲线，绘制语音情感识别分类的混淆矩阵，分析网络模型的优点与不足，寻找提升网络识别准确率的方法，对网络模型进行改进。
+[P193|Normal] 4.  报告要求
+[P194|List Paragraph] 提交纸质版课程报告一份，包括内容有：方案论述，框架设计，程序设计，测试方案与测试结果等。
+[P195|Normal] 电子版材料：录制演示视频，在汇报中展示。
+[P196|List Paragraph] 上交材料：(1)课程设计报告；(2)系统程序；(3)自己认为必要的辅助材料。
+[P197|Normal] 课题六 流质化工产品罐车加注与回收口精确位姿估计
+[P198|Normal] 设计内容
+[P199|Normal] 为了实现化工生产中各种工业产品的完全自动化加注，需要首先对流质化工产品（如酒精、乙二醇等醇类、苯类、甲烷、丙烷、LNG等天然气液体）的主要运输载体——运输化工液体槽罐车的加注与回收口的位姿进行精确估计，进而实现后续的机械臂路径规划等自动化加注流程。本课题以RGBD相机为主要传感器，设计内容为针对不同类型的罐车加注口与回收口布局类型，设计鲁棒性较强的程序实现加注口与回收口的精确位姿（包含圆面中心点3维坐标和圆面法向量）。
+[P200|Normal] 材料准备
+[P201|Normal] 1)语言：不限，推荐Python/C++
+[P202|Normal] 2)点云数据及其他文件。
+[P203|Normal] 下载链接1夸克网盘：https://pan.quark.cn/s/7acc8c5888ea
+[P204|Normal] 提取码1：iY9f
+[P205|Normal] 下载链接2百度网盘：https://pan.baidu.com/s/1nWuF0s3lsikn_iInyD9ncg?pwd=2101
+[P206|Normal] 提取码2：2101
+[P207|Normal] 3)开源点云编辑软件CloudCompare
+[P208|Normal] 4)设计方案可能用到的三方库和方法，供参考无硬性要求：
+[P209|Normal] 开源三方库Point Cloud Library配置
+[P210|Normal] Filters模块空间裁剪器类
+[P211|Normal] PCL求解规则点云的拟合圆
+[P212|Normal] 点云配准方法SAC-IA、ICP
+[P213|Normal] RANSAC拟合模型
+[P214|Normal] 设计要求
+[P215|Normal] 针对数据集中不同的场景，以各自点云文件或2D图像为输入，输出对应场景的加注口和回收口圆心坐标及法向量，要求圆心各轴坐标误差不超过20mm，法向量俯仰角、偏航角与实际偏差不超过5°；
+[P216|Normal] 需要特别注意的是实车数据集的10个场景各自的加注口和回收口的接口部分规格完全一致，但其深浅和相对位置是不固定的，只能确定左右关系，因此需要在设计程序之初就考虑到整体流程的鲁棒性，进而使其能够适应更多不同的两口分布、处理更多种类的槽罐车数据。
+[P217|Normal] 考虑到自动化加注的时效性，程序总处理时长不超过60s；
+[P218|Normal] 学有余力可以考虑将圆心和法向量的结果进行可视化展示（如visual1.png、visual2.png所示）以及进一步提高坐标和法向量的精确度；
+[P219|Normal] 数据格式说明
+[P220|Normal] 任意选取特定场景，使用数据集中该场景下任何可利用的数据类型作为输入，输出格式不作要求，只需输出该场景下的相机点云坐标系下的加注口与回收口的圆心3维坐标和圆面法向量结果并截图验证（验证方法可参考val1.png、val2.png）结果的准确性。
+[P221|Normal] 数据集包含内容说明如下：
+[P222|Normal] “实验箱2D图像及对应点云”文件夹包含9组由RGBD相机采集的实验箱不同角度的加注回收口二维图像和点云文件，可用于程序输入获取其两圆中心坐标及法向量；
+[P223|Normal] “实车点云”文件夹包含ICP_input0.pcd、ICP_input1.pcd、……、ICP_input9.pcd，为真实槽罐车实地采集的原始输入点云文件，不同于“2D图像及对应点云”文件夹，这10个pcd文件不包含对应的2D图像数据，如果选择的方案需要用到2D图像可不考虑该类数据作为输入；
+[P224|Normal] source.pcd为可用于配准的加注回收口标准模板点云文件，sor_pass_ly.pcd和sor_pass_ry.pcd分别为回收口（左、小圆）和加注口（右、大圆）模板点云文件；
+[P225|Normal] coordinates.txt为3）中模板文件加注回收口的相机点云坐标系下的3D坐标，第一行为回收口，第二行为加注口；
+[P226|Normal] visual1.png、visual2.png为圆心和法向量估计结果的可视化展示示例；
+[P227|Normal] val1.png、val2.png为结果验证方法，图中软件为CloudCompare，该验证方法仅供参考，非硬性要求，如有其他更好的验证方法也可以使用。
+[P228|Normal] 报告要求
+[P229|Normal] 提交纸质版课程报告一份，包括内容有：方案论述，框架设计，程序设计，测试方案与测试结果等。
+[P230|Normal] 电子版材料：录制演示视频，在汇报中展示。
+[P231|Normal] 上交材料：(1)课程设计报告；(2)系统程序及运行说明文件；(3)自己认为必要的辅助材料。
+[P232|Normal] 课题七 基于Simulink的移动机器人轨迹跟踪控制
+[P233|Normal] 1、设计内容
+[P234|Normal] 轨迹跟踪控制是移动机器人运动控制中的基本问题之一。与课题一至课题三所研究的机器人路径规划问题相衔接，轨迹跟踪控制要解决的是"机器人如何沿规划得到的期望轨迹运动"的问题：给定一条与时间相关的参考轨迹（包含参考位置、参考航向角与参考速度），设计控制律使机器人从任意初始位姿出发，跟踪误差渐进收敛到零。本课题基于差速驱动机器人运动学模型，采用反馈线性化方法设计轨迹跟踪控制器，在MATLAB/Simulink环境中完成建模与仿真验证。课题全部内容为纯软件仿真，无需ROS环境与硬件平台，仅使用Simulink基本模块（积分器、增益、三角函数、求和、乘法、饱和、多路选择开关等）即可完成，并提供一键建模脚本与一键仿真演示脚本，保证课题可复现、难度适中，适合作为移动机器人运动控制方向的入门课题。
+[P236|Normal] 2、材料准备
+[P237|Normal] 1. MATLAB R2021b及以上版本（含Simulink，无需其他工具箱）；
+[P238|Normal] 2. 差速驱动机器人运动学模型与反馈线性化轨迹跟踪控制律（参考《机器人学》《机器人控制》等教材相关章节及Kanayama轨迹跟踪控制相关文献）；
+[P239|Normal] 3. 随任务书提供的配套材料：建模脚本build_tracking_model.m、仿真演示脚本run_tracking_demo.m及使用说明README.md。
+[P241|Normal] 3、设计要求
+[P242|Normal] 1. 查阅轨迹跟踪控制相关教材与文献，了解移动机器人运动学模型与常用轨迹跟踪控制方法的原理及研究现状；
+[P243|Normal] 2. 建立差速驱动机器人运动学模型（ẋ=v·cosθ，ẏ=v·sinθ，θ̇=ω），说明模型中各符号的物理意义与建模假设；
+[P244|Normal] 3. 设计基于反馈线性化的轨迹跟踪控制器：以e1、e2、e3表示纵向、横向与航向跟踪误差，控制律为v=vr·cos(e3)+k1·e1、ω=ωr+k2·vr·e2+k3·vr·sin(e3)，说明控制律的推导思路与各增益的物理意义；
+[P245|Normal] 4. 在Simulink中使用基本模块搭建"参考轨迹→轨迹跟踪控制器→机器人运动学模型"闭环仿真模型，要求理解模型中每个模块的作用；
+[P246|Normal] 5. 分别对直线、圆形、8字形（Lissajous曲线）三类参考轨迹进行跟踪仿真，绘制参考轨迹与机器人实际轨迹对比图、跟踪误差（e1、e2、e3）随时间变化曲线；
+[P247|Normal] 6. 参数分析：改变控制器增益k1、k2、k3与机器人初始位姿，观察并分析其对收敛速度、超调量与稳态误差的影响，总结参数选取的一般原则；
+[P248|Normal] 7. 可复现要求：运行build_tracking_model.m一键生成Simulink模型，运行run_tracking_demo.m一键完成全部仿真并自动输出结果图；报告中给出模型截图、仿真结果图与参数分析结论。
+[P249|Normal] 4、数据建议格式
+[P250|Normal] 1）模型输入参数（全部为MATLAB工作区变量，在仿真脚本中定义，Simulink模型通过模块参数自动读取）：
+[P251|Normal] 控制器参数：k1、k2、k3（增益），vmax、wmax（执行机构饱和限幅）；建议k1=2、k2=5、k3=4，vmax=2 m/s，wmax=5 rad/s；
+[P252|Normal] 机器人初始位姿：x0、y0、th0；建议x0=0、y0=-0.5、th0=0；
+[P253|Normal] 轨迹类型选择：TrajType（1直线、2圆形、3八字形）；
+[P254|Normal] 直线轨迹参数：v_line（参考线速度）、y_line（起点y坐标）、phi_line（航向角）；建议v_line=0.5 m/s、y_line=0.5、phi_line=0.3 rad；
+[P255|Normal] 圆形轨迹参数：circle_xc、circle_yc（圆心坐标）、circle_R（半径）、circle_w（角频率）；建议circle_xc=0、circle_yc=0、circle_R=2 m、circle_w=0.5 rad/s；
+[P256|Normal] 8字形轨迹参数：eight_a（幅值）、eight_w（角频率）；建议eight_a=2 m、eight_w=0.4 rad/s。
+[P257|Normal] 2）模型输出数据：仿真结果由To Workspace模块以Timeseries格式保存到MATLAB工作区，供绘图脚本直接读取：
+[P258|Normal] xr_ts、yr_ts：参考轨迹位置；x_ts、y_ts、th_ts：机器人实际位姿；e1_ts、e2_ts、e3_ts：跟踪误差；v_ts、w_ts：控制量（线速度、角速度）。
+[P259|Normal] 课题八 自主选题（撰写任务书→提出申请→老师审批）
+[P260|Heading 2] 四 考核方式及成绩评定（暂定）
+[P261|Normal] 需针对实验模块的原理、意义及应用背景等撰写工程训练调研报告。意义及应用背景占30%；拟采用方法技术占40%；涉及知识和课程10%；参考文献规范性占20%。意义及应用背景部分，需回答的问题（但不限于此）：（1）如何在此类实际工程项目设计环节考虑社会、健康、安全、法律、文化以及环境等因素？（2）在类似项目实施过程中可能会出现哪些伦理问题？该如何处理？（3）你认为一个实际的此类工程项目的成本预算包括哪些部分？（4）谈谈你准备如何管理一个此类的实际工程项目。
+[P263|Normal] 工程训练报告的实验分析与演示占50分；
+[P264|Normal] 方法原理性分析20%；实验参数分析与实验方法对比50%，系统实现与运行30%。
+[P265|Normal] 小组汇报占50分；
+[P266|Normal] ppt美观内容充实40%，实验演示视频30%，汇报时间把握10%，汇报讲解流畅性与组内合作20%。
+[P267|Heading 2] 说明：
+[P268|Body Text Indent 2] 自由组合，分组进行，每组3人，每组选1个题目。可自行命题（但要申请，任务书需通过老师们的评估后，方案可行即可）；
+[P269|Body Text Indent 2] 2026年9月8日工程训练动员大会，请班长在当日22点前将每组成员名单和选题情况，发到邮箱42217809@qq.com；
+[P270|List Paragraph] 答辩验收时间：待定；地点：升华后楼教室（暂定）；
+[P271|Body Text Indent 2] 课题验收安排：本次工程训练验收。暂定按小组答辩验收，每名成员须根据自己的具体任务和所完成工作，回答老师提问；
+[P272|Body Text Indent 2] 工程训练报告上交要求【每人一份工程训练报告】：班长收集整理齐纸质报告，另外电子版材料包括：工程训练报告+程序+答辩ppt+演示视频1-2分钟，可用百度网盘提交（命名：学号+姓名+题号）。
+[P273|Heading 2] 五．上机要求
+[P274|Normal] 1．自觉遵守实验室各项规章制度；
+[P275|Normal] 2．实验前应预习，实验过程中请自己爱惜计算机和其它设备；
+[P276|Normal] 3．实验离开时，请关好电源，并归还设备。
+[P277|Heading 2] 六．工程训练报告写作内容及格式与要求
+[P278|Normal] 工程训练报告内容：
+[P279|Normal] 报告重点阐述系统组成框图、原理设计和软件程序流程图。报告必须按照规定的格式要求（封面、目录、正文、图、表、公式、参考文献等）进行撰写，结束语部分要写出调试中遇到的具体问题和解决的办法，以及自己的收获、体会和建议。
+[P280|Normal] 工程训练报告写作格式与要求：
+[P281|Normal] 一、封面
+[P282|Normal] 二、内容提要
+[P283|Normal] 三、目录
+[P284|Normal] 四、正文 【20页以上】
+[P285|Normal] 1、概述所作题目的目的和意义、系统的主要内容和功能；
+[P286|Normal] 2、设计流程及描述（包括各类实验的实验报告要求）；
+[P287|Normal] 4、源程序代码（要有注释）。
+[P288|Normal] 五、心得体会
+[P289|Normal] 六、参考文献(25篇以上，中文参考文献占比20%以上)
+[P291|Normal] <IMAGE>
+[P292|样式 四号 居中 段后: 0.5 行] CENTRAL    SOUTH    UNIVERSITY
+[P294|Normal] 《智能系统工程训练》报告
+[TABLE298]
+   | 题    目 | 
+   | 学生姓名 | 
+   | 学    号 | 
+   | 专业班级 | 
+   | 完成时间 | 
