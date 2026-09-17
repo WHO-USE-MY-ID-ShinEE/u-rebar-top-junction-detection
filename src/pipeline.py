@@ -93,7 +93,6 @@ def export_points(station, result, out_dir=DEFAULT_OUT_DIR):
     json_path = out_dir / f"station_{station}_points.json"
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump({"station": station,
-                   "size_wh": [int(result["h_lines"][0]["point"].shape[0]) if False else 0],
                    "points": [[int(x), int(y)] for x, y, _ in points]},
                   f, ensure_ascii=False, indent=1)
 
