@@ -1,8 +1,9 @@
 """打包 Ubuntu 验证包：只带运行与验证需要的东西。
 
-打包内容：run.py、requirements.txt、src/、docs/、tools/probe/*.py、
-tools/verify_outputs.py、任务书数据+代码/、ref_win/（Windows 端产物，供逐点比对）。
-排除：outputs/、.git/、__pycache__、探针里的证据图与大图。
+打包内容：app.py、app/（图形界面）、run.py、requirements.txt、src/、docs/、
+tools/probe/*.py、tools/verify_outputs.py、任务书数据+代码/、
+ref_win/（Windows 端产物，供逐点比对）。
+排除：outputs/、outputs_app/、.git/、__pycache__、探针里的证据图与大图。
 
 用法：python tools/make_ubuntu_package.py
 """
@@ -12,9 +13,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "dist" / "gygj_ubuntu.zip"
 
-INCLUDE_FILES = ["run.py", "requirements.txt"]
-INCLUDE_DIRS = ["src", "docs"]
-SKIP_DIRS = {"__pycache__", ".git", "outputs", "preview", "media"}
+INCLUDE_FILES = ["app.py", "run.py", "requirements.txt"]
+INCLUDE_DIRS = ["src", "app", "docs"]
+SKIP_DIRS = {"__pycache__", ".git", "outputs", "outputs_app", "preview", "media"}
 SKIP_SUFFIX = {".pyc"}
 
 

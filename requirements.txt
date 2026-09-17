@@ -4,3 +4,7 @@ opencv-python>=4.8      # 图像读写、形态学、HoughLinesP、连通域
 numpy>=1.24             # 数组运算（骨架化、PCA、直方图）
 pillow>=9.0             # 结果图中文标注
 scipy>=1.10             # 仅 tools/probe/ 下的诊断脚本使用（峰值检测）
+
+# 图形界面应用（python app.py）另需系统自带的 Tkinter，不走 pip：
+#   Ubuntu 22.04: sudo apt install python3-tk fonts-noto-cjk
+#   （python3-tk 提供 Tk 运行时，fonts-noto-cjk 提供界面与结果图的中文字形）

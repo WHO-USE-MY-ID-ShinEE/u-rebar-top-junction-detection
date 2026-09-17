@@ -34,9 +34,10 @@ def texture_energy(gray, ksize=9):
     return np.clip(mean_sq - mean * mean, 0.0, None)
 
 
-def enhance(gray):
-    """返回 (增强灰度图, 纹理能量图)。"""
-    enhanced = clahe(gray)
+def enhance(gray, clip_limit=DEFAULT_CLIP_LIMIT,
+            tile_grid=DEFAULT_TILE_GRID):
+    """返回 (增强灰度图, 纹理能量图)。clip_limit 可由界面调节。"""
+    enhanced = clahe(gray, clip_limit=clip_limit, tile_grid=tile_grid)
     return enhanced, texture_energy(enhanced)
 
 
