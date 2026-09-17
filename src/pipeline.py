@@ -40,6 +40,7 @@ def run_preview(station, data_dir=DEFAULT_DATA_DIR, out_dir=DEFAULT_OUT_DIR,
                 split_mm=None):
     """阶段一：读数据 -> 灰度增强 -> 分层 -> 输出对照图。"""
     out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
     enhanced, depth_mm = _load_enhanced(data_dir, station)
     depth_vis = enhance.depth_visual(depth_mm)
 
@@ -62,6 +63,7 @@ def run_detect(station, data_dir=DEFAULT_DATA_DIR, out_dir=DEFAULT_OUT_DIR,
                params=None):
     """阶段二：检测交叉点，输出标注图（筋条轴线 + 三类交叉点）。"""
     out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
     enhanced, depth_mm = _load_enhanced(data_dir, station)
     res = detect.detect_rebar_intersections(depth_mm, enhanced, params)
 
@@ -80,6 +82,7 @@ def run_report(station, data_dir=DEFAULT_DATA_DIR, out_dir=DEFAULT_OUT_DIR,
                params=None):
     """阶段三：输出交付用的一页式结果图 + 交叉点坐标文件。"""
     out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
     enhanced, depth_mm = _load_enhanced(data_dir, station)
     depth_vis = enhance.depth_visual(depth_mm)
     res = detect.detect_rebar_intersections(depth_mm, enhanced, params)
@@ -112,10 +115,24 @@ def run_report(station, data_dir=DEFAULT_DATA_DIR, out_dir=DEFAULT_OUT_DIR,
             "stats": res["stats"], "split_mm": res["split_mm"]}
 
 
+def _stations_or_raise(stations, data_dir):
+    """确定要处理哪些工位；一个都找不到时给出能照着排错的报错。"""
+    found = list(stations) if stations else imgio.list_stations(data_dir)
+    if not found:
+        raise FileNotFoundError(
+            f"没有在数据目录里找到任何工位数据：{Path(data_dir).resolve()}\n"
+            f"  该目录下应存在形如 station_N_{imgio.DEPTH_SUFFIX} 的文件。请检查：\n"
+            f"  1) 数据目录是否已拷入、名字是否被解压工具改坏（目录名含中文，\n"
+            f"     建议用 python3 -c \"import zipfile;zipfile.ZipFile(\'包名\').extractall()\" 解压）；\n"
+            f"  2) 是否需要用 --data-dir 指定数据目录。")
+    return found
+
+
 def run_all_reports(stations=None, data_dir=DEFAULT_DATA_DIR,
                     out_dir=DEFAULT_OUT_DIR, params=None):
     """批量出报告，并汇总一张 statistic 表。"""
-    stations = stations or imgio.list_stations(data_dir)
+    stations = _stations_or_raise(stations, data_dir)
+    Path(out_dir).mkdir(parents=True, exist_ok=True)
     rows = []
     for n in stations:
         r = run_report(n, data_dir=data_dir, out_dir=out_dir, params=params)
@@ -143,4 +160,5 @@ def run_stations(stations, stage="preview", **kwargs):
     fn = {"preview": run_preview, "detect": run_detect, "report": run_report}.get(stage)
     if fn is None:
         raise NotImplementedError(f"未知阶段 {stage}")
+    stations = _stations_or_raise(stations, kwargs.get("data_dir", DEFAULT_DATA_DIR))
     return [fn(n, **kwargs) for n in stations]
