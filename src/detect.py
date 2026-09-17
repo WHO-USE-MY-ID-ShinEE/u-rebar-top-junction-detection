@@ -48,6 +48,9 @@ DEFAULTS = dict(
     support_reach_px=50,      # 交叉点的局部支撑检查范围
     support_min_ratio=0.55,   # 两个方向各需达到的支撑比例
     support_halfwidth=12,
+    blob_inner_px=18,         # 实心块判据：四角取样框的内边界
+    blob_outer_px=30,         #                   外边界
+    blob_fill_limit=0.75,     #                   四角填充率上限
 )
 
 
@@ -177,26 +180,41 @@ def _refit(px, family, a, b, params):
             "extent": (c + direction * proj.min(), c + direction * proj.max())}
 
 
-def _dedup(lines, params):
-    """合并同族内近乎重合的筋条。"""
+def _ref_pos(line, shape):
+    """筋条在图像中心处的横向（竖筋）/ 纵向（横筋）位置。
+
+    判断两条候选线是不是同一根筋，不能直接比截距 b：b 是 y=0（或 x=0）处的
+    截距，两条斜率略有差异的候选线在画面中部几乎重合，在原点处却可能差几十
+    像素，于是同一条筋因为去重失败而变成两条。实测 station_8 左边缘那根竖筋
+    就被拆成 b=39.6 与 b=68.6 两条：在 y=720 处只差 10px，按原点截距比较却差
+    29px，超过去重阈值，于是多出一根幽灵筋、并多出一批幽灵交叉点。
+    """
+    a, b = line["ab"]
+    if line["family"] == "H":
+        return a * (shape[1] / 2.0) + b
+    return a * (shape[0] / 2.0) + b
+
+
+def _dedup(lines, params, shape):
+    """合并同族内近乎重合的筋条（按图像中心处的位置比较，见 _ref_pos）。"""
     a_tol = params["dedup_slope_tol"]
     b_tol = params["dedup_intercept_px"]
-    kept = []
+    kept = []                       # [(筋条, 中心处位置)]
     for l in sorted(lines, key=lambda z: (z["family"], z["ab"][1])):
-        a, b = l["ab"]
+        a = l["ab"][0]
+        r = _ref_pos(l, shape)
         hit = None
-        for i, k in enumerate(kept):
+        for i, (k, kr) in enumerate(kept):
             if k["family"] != l["family"]:
                 continue
-            ka, kb = k["ab"]
-            if abs(a - ka) < a_tol and abs(b - kb) < b_tol:
+            if abs(a - k["ab"][0]) < a_tol and abs(r - kr) < b_tol:
                 hit = i
                 break
         if hit is None:
-            kept.append(l)
-        elif l["n_support"] > kept[hit]["n_support"]:
-            kept[hit] = l
-    return kept
+            kept.append((l, r))
+        elif l["n_support"] > kept[hit][0]["n_support"]:
+            kept[hit] = (l, r)
+    return [l for l, _ in kept]
 
 
 def extract_bar_lines(binary, params=None):
@@ -242,7 +260,7 @@ def extract_bar_lines(binary, params=None):
                         bb = float(cx - aa * cy)
                     line["ab"] = (aa, bb)
                     lines.append(line)
-    return _dedup(lines, p), skel
+    return _dedup(lines, p, binary.shape), skel
 
 
 def split_directions(lines):
@@ -289,17 +307,32 @@ def _filter_by_slope(lines, ref):
     return [l for l in lines if lo <= l["ab"][0] <= hi]
 
 
-def _direction_support(mask, pt, direction, params):
-    """沿 direction 正负两个方向检查掩膜是否连续跟随。返回 (正向比, 负向比)。"""
+def _direction_support(mask, pt, line, params):
+    """沿筋条轴线正负两个方向检查掩膜是否连续跟随。
+    返回 (正向比, 负向比)，某一侧“无法评估”时该侧为 None。
+    两种情况算“无法评估”，都不能当成“没有支撑”：
+      * 全部采样点落在图像外——实测 station_1 顶部的交叉点
+        (131.5, 7.5) 就在第一行附近，向上采样必然全部越界；
+      * 全部采样点超出该筋条实测跨度——交厹落在筋条端头时下一侧
+        本来就没有钢筋，实测 station_9 右下角交叉点 (1048.6, 1397.3)
+        就是这种情况（筋在交点下方 10px 处结束）。
+    """
+    direction = line["direction"]
+    proj = [(e - line["point"]) @ direction for e in line["extent"]]
+    lo, hi = min(proj), max(proj)
+    # 交厹在轴线方向上的位置（相对筋条中心），采样点的绝对位置是 base + sign*t
+    base = float((pt - line["point"]) @ direction)
     reach = params["support_reach_px"]
     half = params["support_halfwidth"]
-    normal = np.array([-direction[1], direction[0]])
     ratios = []
     for sign in (1.0, -1.0):
         hit = 0
         total = 0
         for t in np.linspace(10.0, reach, 9):
-            q = pt + direction * (sign * t)
+            s = sign * t
+            if not lo <= base + s <= hi:     # 该处本来就没有这根筋，无从判断
+                continue
+            q = pt + direction * s
             x, y = int(round(q[0])), int(round(q[1]))
             if not (0 <= x < mask.shape[1] and 0 <= y < mask.shape[0]):
                 continue
@@ -308,7 +341,7 @@ def _direction_support(mask, pt, direction, params):
             y0, y1 = max(0, y - half), min(mask.shape[0], y + half + 1)
             if mask[y0:y1, x0:x1].any():
                 hit += 1
-        ratios.append(hit / total if total else 0.0)
+        ratios.append(hit / total if total else None)
     return ratios[0], ratios[1]
 
 
@@ -317,13 +350,41 @@ def crossing_supported(mask, pt, line_a, line_b, params):
 
     非钢筋杂物（圆形垫块、浅色长条）即使让某条直线勉强穿过，局部也不会有
     沿筋方向的连续支撑，据此判为"虚假干扰点"。
+
+    只对“可评估”的方向（有采样点落在图像内）作要求，越界方向跳过。
     """
     need = params["support_min_ratio"]
     for line in (line_a, line_b):
-        pos, neg = _direction_support(mask, pt, line["direction"], params)
-        if pos < need or neg < need:
+        vals = [r for r in _direction_support(mask, pt, line, params)
+                if r is not None]
+        if vals and min(vals) < need:
             return False
     return True
+
+
+def solid_around(mask, pt, params):
+    """交叉点四周是否被掩膜整片填满（说明这里是实心块，不是两条细筋交叉）。
+
+    真钢筋交叉：两条约一个钢筋直径宽的条带正交，四个斜角方向是空的。实测 294
+    个保留点的四角填充率中位数为 0.00（九成以上恰好是 0）；而非钢筋的实心物体
+    会把四角填满——实测 station_7 (86,545) 处为 1.00，且该处深度比它所依托的
+    两条筋各近约 52mm，是一块挡在钢筋笼前面的实心件。
+    """
+    x, y = int(round(pt[0])), int(round(pt[1]))
+    inner, outer = params["blob_inner_px"], params["blob_outer_px"]
+    h, w = mask.shape
+    fills = []
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            x0, x1 = sorted((x + sx * inner, x + sx * outer))
+            y0, y1 = sorted((y + sy * inner, y + sy * outer))
+            x0, y0 = max(x0, 0), max(y0, 0)
+            x1, y1 = min(x1, w), min(y1, h)
+            if x1 > x0 and y1 > y0:
+                fills.append(float(mask[y0:y1, x0:x1].mean()))
+    if not fills:
+        return False
+    return float(np.mean(fills)) >= params["blob_fill_limit"]
 
 
 def merge_points(points, radius):
@@ -413,7 +474,8 @@ def detect_rebar_intersections(depth_mm, gray=None, params=None):
                 short = min(a["span"], b["span"]) < p["min_bar_px"]
                 if name == "far" or not is_top:
                     lower.append(item)          # 深度阈值筛掉的下层交叉点
-                elif short or not crossing_supported(mask, pt, a, b, p):
+                elif (short or not crossing_supported(mask, pt, a, b, p)
+                      or solid_around(mask, pt, p)):
                     clutter.append(item)        # 形状/连续性不像钢筋
                 else:
                     accepted.append(item)
