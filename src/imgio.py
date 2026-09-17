@@ -68,22 +68,42 @@ def station_paths(data_dir, station):
             data_dir / f"station_{station}_{GRAY_SUFFIX}")
 
 
-def load_station(data_dir, station):
-    """读取一个站点，返回 (gray, depth_mm, depth_raw)。
+def load_pair(depth_path, gray_path=None):
+    """读取一对配套的（深度图, 灰度图），返回 (gray, depth_mm, depth_raw)。
 
-    gray      : uint8 单通道，1440x1080，已与深度对齐
+    gray      : uint8 单通道，已与深度对齐；不给灰度图时为 None
     depth_mm  : float32，单位毫米，无效像素为 NaN
     depth_raw : float32 原始米制深度（未旋转），仅用于回溯排查
+
+    对齐规则：深度图与灰度图尺寸互为转置时逆时针旋转 90 度（本数据集的情形）；
+    尺寸已相同时不旋转；都不符合则报错。
     """
-    depth_path, gray_path = station_paths(data_dir, station)
     depth_raw = imread_any(depth_path)
     if depth_raw is None:
         raise FileNotFoundError(f"深度图读取失败: {depth_path}")
-    gray = to_gray(imread_any(gray_path))
-    depth = align_depth(depth_raw)
-    if gray is not None and gray.shape != depth.shape:
-        raise ValueError(f"对齐后尺寸不一致: gray={gray.shape} depth={depth.shape}")
+    depth = depth_raw
+    if gray_path is not None:
+        raw_gray = imread_any(gray_path)
+        if raw_gray is None:
+            raise FileNotFoundError(f"灰度图读取失败: {gray_path}")
+        gray = to_gray(raw_gray)
+        if depth_raw.shape == gray.shape:
+            pass
+        elif depth_raw.shape[::-1] == gray.shape:
+            depth = align_depth(depth_raw)
+        else:
+            raise ValueError(f"深度图与灰度图尺寸无法对齐: "
+                             f"depth={depth_raw.shape} gray={gray.shape}")
+    else:
+        gray = None
+        depth = align_depth(depth_raw)      # 无灰度图可参照，按本数据集约定处理
     return gray, to_mm(depth), depth_raw
+
+
+def load_station(data_dir, station):
+    """读取数据集里的一个工位，返回 (gray, depth_mm, depth_raw)。"""
+    depth_path, gray_path = station_paths(data_dir, station)
+    return load_pair(depth_path, gray_path)
 
 
 def list_stations(data_dir):

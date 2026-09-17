@@ -25,6 +25,7 @@ import numpy as np
 from .layers import auto_split_mm, split_layers
 
 DEFAULTS = dict(
+    split_mm=None,            # 一层/二层深度分界；None = 按深度直方图空段自动定界
     close_ksize=3,
     skel_max_iter=18,
     hough_thresh=60,
@@ -416,9 +417,9 @@ def detect_rebar_intersections(depth_mm, gray=None, params=None):
     if params:
         p.update(params)
 
-    split = auto_split_mm(depth_mm)
+    split = p["split_mm"] if p["split_mm"] else auto_split_mm(depth_mm)
     if split is None:
-        raise ValueError("无法自动分层，需要先检查深度直方图")
+        raise ValueError("无法自动分层，需要在参数里手动指定 split_mm")
     top_mask, far_mask, _ = split_layers(depth_mm, split)
 
     # 下层被上层遮挡，筋条必然断续，覆盖度天然偏低（实测被挡住的竖筋只有 0.37），

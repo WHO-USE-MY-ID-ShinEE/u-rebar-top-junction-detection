@@ -91,27 +91,8 @@ def run_report(station, data_dir=DEFAULT_DATA_DIR, out_dir=DEFAULT_OUT_DIR,
     out_path = out_dir / f"station_{station}_result.png"
     imgio.imwrite_any(out_path, sheet)
 
-    csv_path = out_dir / f"station_{station}_points.csv"
-    with open(csv_path, "w", encoding="utf-8") as f:
-        f.write("point_id,x_px,y_px,z_mm\n")
-        for i, (x, y, z) in enumerate(res["accepted"], 1):
-            f.write(f"P{i:03d},{x},{y},{z:.2f}\n")
-
-    json_path = out_dir / f"station_{station}_points.json"
-    with open(json_path, "w", encoding="utf-8") as f:
-        json.dump({"station": station,
-                   "split_mm": round(res["split_mm"], 1),
-                   "points": [[int(x), int(y)] for x, y, _ in res["accepted"]]},
-                  f, ensure_ascii=False, indent=1)
-
-    rej_path = out_dir / f"station_{station}_rejected.json"
-    with open(rej_path, "w", encoding="utf-8") as f:
-        json.dump({"lower": [[int(x), int(y)] for x, y, _ in res["rejected_lower"]],
-                   "clutter": [[int(x), int(y)] for x, y, _ in res["rejected_clutter"]]},
-                  f, ensure_ascii=False, indent=1)
-
-    return {"station": station, "out": str(out_path), "csv": str(csv_path),
-            "json": str(json_path), "rejected": str(rej_path),
+    files = export_points(out_dir, f"station_{station}", res)
+    return {"station": station, "out": str(out_path), **files,
             "stats": res["stats"], "split_mm": res["split_mm"]}
 
 
@@ -126,6 +107,42 @@ def _stations_or_raise(stations, data_dir):
             f"     建议用 python3 -c \"import zipfile;zipfile.ZipFile(\'包名\').extractall()\" 解压）；\n"
             f"  2) 是否需要用 --data-dir 指定数据目录。")
     return found
+
+
+def export_points(out_dir, name, res):
+    """把一次检测结果写成坐标文件（csv / json / 被剔除点 json）。
+
+    name 是输出文件的前缀，工位跑批时用 station_N，界面里打开任意图像对时用文件名。
+    """
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    csv_path = out_dir / f"{name}_points.csv"
+    with open(csv_path, "w", encoding="utf-8") as f:
+        f.write("point_id,x_px,y_px,z_mm\n")
+        for i, (x, y, z) in enumerate(res["accepted"], 1):
+            f.write(f"P{i:03d},{x},{y},{z:.2f}\n")
+
+    # 工位数据集沿用原来的 station 字段（保持与历史输出可逐字节对照），
+    # 打开任意图像对时没有工位号，就写文件名。
+    if name.startswith("station_") and name[len("station_"):].isdigit():
+        head = {"station": int(name[len("station_"):])}
+    else:
+        head = {"name": name}
+    head["split_mm"] = round(res["split_mm"], 1)
+    json_path = out_dir / f"{name}_points.json"
+    with open(json_path, "w", encoding="utf-8") as f:
+        json.dump({**head,
+                   "points": [[int(x), int(y)] for x, y, _ in res["accepted"]]},
+                  f, ensure_ascii=False, indent=1)
+
+    rej_path = out_dir / f"{name}_rejected.json"
+    with open(rej_path, "w", encoding="utf-8") as f:
+        json.dump({"lower": [[int(x), int(y)] for x, y, _ in res["rejected_lower"]],
+                   "clutter": [[int(x), int(y)] for x, y, _ in res["rejected_clutter"]]},
+                  f, ensure_ascii=False, indent=1)
+
+    return {"csv": str(csv_path), "json": str(json_path), "rejected": str(rej_path)}
 
 
 def run_all_reports(stations=None, data_dir=DEFAULT_DATA_DIR,
