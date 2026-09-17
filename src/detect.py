@@ -37,6 +37,9 @@ DEFAULTS = dict(
     dedup_intercept_px=24.0,
     min_support_px=120,
     min_coverage=0.5,       # 支撑像素数/跨度 的下限，滤掉勉强连起来的弱线
+    far_min_coverage=0.2,   # 下层被遮挡，覆盖度门槛单独放宽
+    far_min_support_px=100,
+    far_slope_spread=0.02,  # 下层筋条斜率相对顶层斜率区间的允许外扩量
     min_bar_px=180,
     cross_margin_px=15,
     merge_px=35.0,            # 交叉点去重半径
@@ -264,6 +267,28 @@ def _within(line, pt, margin):
     return abs(float((pt - line["point"]) @ line["direction"])) <= line["span"] / 2 + margin
 
 
+def _slope_reference(lines, spread, min_coverage=0.9):
+    """由一组筋条给出可接受的斜率区间。
+
+    取"高质量筋条"（覆盖度 >= min_coverage）斜率的**中位数**再向两侧放开 spread。
+    用中位数而不是 min/max：实测顶层里也偶尔混进一条 a≈0 的坏线，
+    用极值会把允许区间拉得太宽，约束就失效了。
+    """
+    good = [l["ab"][0] for l in lines if l["coverage"] >= min_coverage]
+    vals = good if good else [l["ab"][0] for l in lines]
+    if not vals:
+        return None
+    c = float(np.median(vals))
+    return c - spread, c + spread
+
+
+def _filter_by_slope(lines, ref):
+    if ref is None:
+        return lines
+    lo, hi = ref
+    return [l for l in lines if lo <= l["ab"][0] <= hi]
+
+
 def _direction_support(mask, pt, direction, params):
     """沿 direction 正负两个方向检查掩膜是否连续跟随。返回 (正向比, 负向比)。"""
     reach = params["support_reach_px"]
@@ -335,23 +360,40 @@ def detect_rebar_intersections(depth_mm, gray=None, params=None):
         raise ValueError("无法自动分层，需要先检查深度直方图")
     top_mask, far_mask, _ = split_layers(depth_mm, split)
 
+    # 下层被上层遮挡，筋条必然断续，覆盖度天然偏低（实测被挡住的竖筋只有 0.37），
+    # 所以下层的覆盖度门槛和段长门槛都要单独放宽，否则会漏掉整条下层筋。
     far_params = dict(p)
     far_params["hough_min_len"] = p["far_hough_min_len"]
     far_params["hough_thresh"] = p["far_hough_thresh"]
+    far_params["min_coverage"] = p["far_min_coverage"]
+    far_params["min_support_px"] = p["far_min_support_px"]
 
     result = {"split_mm": float(split), "accepted": [], "rejected_lower": [],
               "rejected_clutter": [], "h_lines": [], "v_lines": [],
+              "far_h_lines": [], "far_v_lines": [],
               "skeleton": None, "top_mask": top_mask, "far_mask": far_mask,
               "stats": {}}
 
     accepted, lower, clutter = [], [], []
+    h_ref = v_ref = None
     for name, mask, layer_params in (("top", top_mask, p),
                                      ("far", far_mask, far_params)):
         lines, skel = extract_bar_lines(mask, layer_params)
+        if name == "far":
+            # 下层被上层遮挡后碎片化，Hough 会"架"出一些斜率明显不对的桥接线
+            # （实测伪线斜率约 0，即几乎完美竖直，而真筋约 -0.057）。
+            # 同一笼子的筋方向一致，所以用顶层测出的斜率区间来约束下层。
+            spread = p["far_slope_spread"]
+            lines = (_filter_by_slope([l for l in lines if l["family"] == "H"], h_ref)
+                     + _filter_by_slope([l for l in lines if l["family"] == "V"], v_ref))
         horiz, vert = split_directions(lines)
         if name == "top":
             result["h_lines"], result["v_lines"] = horiz, vert
             result["skeleton"] = skel
+            h_ref = _slope_reference(horiz, p["far_slope_spread"])
+            v_ref = _slope_reference(vert, p["far_slope_spread"])
+        else:
+            result["far_h_lines"], result["far_v_lines"] = horiz, vert
         for a in horiz:
             for b in vert:
                 pt = intersect(a, b)
@@ -384,6 +426,8 @@ def detect_rebar_intersections(depth_mm, gray=None, params=None):
               if l["coverage"] > 1.8]
     result["stats"] = {"h_bars": len(result["h_lines"]),
                        "v_bars": len(result["v_lines"]),
+                       "far_h_bars": len(result["far_h_lines"]),
+                       "far_v_bars": len(result["far_v_lines"]),
                        "accepted": len(result["accepted"]),
                        "lower": len(result["rejected_lower"]),
                        "clutter": len(result["rejected_clutter"]),
